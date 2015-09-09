@@ -3,7 +3,7 @@
 import sys, os
 import argparse
 from ROOT import TFile, gDirectory, TIter, TCanvas
-from plotutils import myText, getLegend
+from plotutils import myText, getLegend, getLegendList
 
 
 def getHistograms(direc):
@@ -21,6 +21,72 @@ def getHistograms(direc):
             histos.append(obj)
     print 'Got ', len(histos), ' TH1s'
     return histos
+
+def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None):
+    print 'compareHists:'
+    c = None
+    cName = 'c_'
+    if pad == None:
+        for h in histos:
+            print h.GetName(), ' ', h.GetEntries()
+            cName += h.GetName()
+        c = TCanvas(cName, cName ,10 ,10 ,700 ,500)
+    else:
+        pad.cd()
+    fillColors = [33,45,20,4,4,4,4,4,4,4,4]
+    lineColors = [1,2,3,4,5,6,7,8,9,10]
+    #lineColors = [1,2,3,4,5,6,7,8,9,10]
+    lineWidth = 2
+    n = 0
+    nm = 0
+    maxBC = -1.
+    hFirst = None
+    for ih in range(len(histos)):
+        h = histos[ih]
+        if ih == 0:
+            hFirst = h
+        h.SetLineColor(lineColors[ih])
+        h.SetLineWidth(lineWidth)
+        if h.GetMaximum() > maxBC:
+            maxBC = h.GetMaximum()
+        f = None
+        if fitName != None:
+            if fitName == 'gaus':
+                print 'Fitting ', h.GetName()
+                h.Fit(fitName,'0')
+                f = h.GetFunction(fitName)
+                if f != None:
+                    f.SetLineColor(lineColors[ih])
+                    f.SetLineWidth(lineWidth)                            
+        if ih != -1:
+            h.SetFillColor(fillColors[ih])
+            h.SetFillStyle(3002)
+        if normalize != None:
+            h.Scale(1.0/h.Integral())
+        if ih == 0:
+            h.Draw('hist')
+        else:
+            h.Draw('hist,same')
+
+        if f != None:
+            f.Draw('same')
+        n=n+1
+        #ans = raw_input('press anywhere to continue')
+    
+    hFirst.SetMaximum(maxBC)
+    if legends:
+        styles = ['FL' for x in range(len(histos))] 
+        l = getLegendList(0.13,0.75,0.25,0.85,histos,legends,styles)
+        l.Draw()
+
+    if c != None:
+        name = cName
+        if t != '':
+            name += '_' + t
+        c.SaveAs(name + '.png')
+    #ans = raw_input('press anywhere to continue')
+
+
 
 def main(file1,file2,legend=None,skip=None,only=None,skipempty=True,pause=False):
     print 'GO'
@@ -88,6 +154,9 @@ def main(file1,file2,legend=None,skip=None,only=None,skipempty=True,pause=False)
     f1.Close()
     f2.Close()
     return 0
+
+
+
 
 
 
