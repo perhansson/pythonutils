@@ -19,6 +19,18 @@ def getLegend(x1,y1,x2,y2,h1,h2,txt1,txt2,style1,style2):
     l.AddEntry(h2,txt2,style2)
     return l
 
+def getLegendList(x1,y1,x2,y2,histos,texts,styles):
+    l = TLegend(x1,y1,x2,y2)
+    l.SetFillColor(0)
+    l.SetFillStyle(0)
+    l.SetBorderSize(0)
+    for i in range(len(histos)):
+        h = histos[i]
+        txt = texts[i]
+        style = styles[i]
+        l.AddEntry(h,txt,style)
+    return l
+
 def setGraphStyle(gr):
     gr.SetMarkerStyle(20)
     gr.SetMarkerSize(1.0)
