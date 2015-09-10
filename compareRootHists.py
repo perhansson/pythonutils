@@ -3,24 +3,9 @@
 import sys, os
 import argparse
 from ROOT import TFile, gDirectory, TIter, TCanvas
-from plotutils import myText, getLegend, getLegendList
+from plotutils import myText, getLegend, getLegendList, getHistograms
 
 
-def getHistograms(direc):
-    histos = []
-    print direc.GetList().GetSize()
-    iter = TIter(direc.GetListOfKeys())
-    print iter.GetCollection().GetSize(), ' items in collection'
-    while True:
-        key = iter.Next()
-        if not key:
-            break
-        obj = key.ReadObj()
-        if obj.InheritsFrom('TH1') and not obj.InheritsFrom('TH2') and not obj.InheritsFrom('TH3'):
-            print 'Getting TH1 %s' % obj.GetName()
-            histos.append(obj)
-    print 'Got ', len(histos), ' TH1s'
-    return histos
 
 def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None):
     print 'compareHists:'

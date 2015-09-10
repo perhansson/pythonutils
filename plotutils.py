@@ -1,5 +1,5 @@
 import sys
-from ROOT import TLatex, TLegend
+from ROOT import TLatex, TLegend, gDirectory, TIter, TCanvas
 
 
 def myText(x,y,text, tsize,color):
@@ -44,3 +44,19 @@ def setBinLabels(gr,names):
         b = h.FindBin(i)
         h.GetXaxis().SetBinLabel(b, p )
         i = i + 1
+
+def getHistograms(direc):
+    histos = []
+    print direc.GetList().GetSize()
+    iter = TIter(direc.GetListOfKeys())
+    print iter.GetCollection().GetSize(), ' items in collection'
+    while True:
+        key = iter.Next()
+        if not key:
+            break
+        obj = key.ReadObj()
+        if obj.InheritsFrom('TH1') and not obj.InheritsFrom('TH2') and not obj.InheritsFrom('TH3'):
+            print 'Getting TH1 %s' % obj.GetName()
+            histos.append(obj)
+    print 'Got ', len(histos), ' TH1s'
+    return histos
