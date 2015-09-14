@@ -1,5 +1,5 @@
 import sys
-from ROOT import TLatex, TLegend, gDirectory, TIter, TCanvas
+from ROOT import TLatex, TLegend, gDirectory, TIter, TCanvas, Double
 
 
 def myText(x,y,text, tsize,color):
@@ -31,9 +31,11 @@ def getLegendList(x1,y1,x2,y2,histos,texts,styles):
         l.AddEntry(h,txt,style)
     return l
 
-def setGraphStyle(gr):
+def setGraphStyle(gr,color=1):
     gr.SetMarkerStyle(20)
     gr.SetMarkerSize(1.0)
+    gr.SetMarkerColor(color)
+    gr.SetLineColor(color)
 
 
 def setBinLabels(gr,names):
@@ -44,6 +46,13 @@ def setBinLabels(gr,names):
         b = h.FindBin(i)
         h.GetXaxis().SetBinLabel(b, p )
         i = i + 1
+
+def setBinLabelsDict(gr,namePoints):
+    h = gr.GetHistogram()
+    print h.GetNbinsX(), ' vs ', gr.GetN()
+    for i,p in namePoints.iteritems():
+        b = h.FindBin(i)
+        h.GetXaxis().SetBinLabel(b, p )
 
 def getHistograms(direc):
     histos = []
@@ -60,3 +69,21 @@ def getHistograms(direc):
             histos.append(obj)
     print 'Got ', len(histos), ' TH1s'
     return histos
+
+
+def getGraphMaxMinVal(gr):
+    ymax = -999999.9
+    ymin = 999999.9
+    for ipoint in range(gr.GetN()):
+        x = Double(0.0)
+        y = Double(0.0)
+        gr.GetPoint(ipoint,x,y)
+        if y > ymax:
+            ymax = y
+        if y < ymin:
+            ymin = y
+    return [ymin, ymax]
+
+
+
+        
