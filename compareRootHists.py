@@ -32,6 +32,9 @@ def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None)
             hFirst = h
         h.SetLineColor(lineColors[ih])
         h.SetLineWidth(lineWidth)
+        h.Sumw2()
+        if normalize != None:
+            h.Scale(1.0/h.Integral())
         if h.GetMaximum() > maxBC:
             maxBC = h.GetMaximum()
         f = None
@@ -46,8 +49,6 @@ def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None)
         if ih != -1:
             h.SetFillColor(fillColors[ih])
             h.SetFillStyle(3002)
-        if normalize != None:
-            h.Scale(1.0/h.Integral())
         if ih == 0:
             h.Draw('hist')
         else:
