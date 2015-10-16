@@ -7,7 +7,7 @@ from plotutils import myText, getLegend, getLegendList, getHistograms
 
 
 
-def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None):
+def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None,myTextSize=0.05):
     print 'compareHists:'
     c = None
     cName = 'c_'
@@ -39,10 +39,13 @@ def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None)
             maxBC = h.GetMaximum()
         f = None
         if fitName != None:
-            if fitName == 'gaus':
+            if fitName['name'] == 'gaus':
                 print 'Fitting ', h.GetName()
-                h.Fit(fitName,'0')
-                f = h.GetFunction(fitName)
+                if 'xmin' and 'xmax' in fitName:
+                    h.Fit(fitName['name'],'0R','',fitName['xmin'],fitName['xmax'])
+                else:
+                    h.Fit(fitName['name'],'0')                    
+                f = h.GetFunction(fitName['name'])
                 if f != None:
                     f.SetLineColor(lineColors[ih])
                     f.SetLineWidth(lineWidth)                            
@@ -56,6 +59,8 @@ def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None)
 
         if f != None:
             f.Draw('same')
+            if fitName['name'] == 'gaus':
+                myText(0.13,0.2+ih*myTextSize,'<m>=%.2e #sigma=%.2e'%(f.GetParameter(1),f.GetParameter(2)),myTextSize,lineColors[ih])
         n=n+1
         #ans = raw_input('press anywhere to continue')
     
