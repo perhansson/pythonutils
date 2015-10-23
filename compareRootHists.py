@@ -2,13 +2,15 @@
 
 import sys, os
 import argparse
-from ROOT import TFile, gDirectory, TIter, TCanvas
-from plotutils import myText, getLegend, getLegendList, getHistograms
+from ROOT import TFile, gDirectory, TIter, TCanvas, TF1
+from plotutils import myText, getLegend, getLegendList, getHistograms, getHistMaxBinValue
+
 
 
 
 def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None,myTextSize=0.05):
     print 'compareHists:'
+    if fitName != None: print 'fitName: ', fitName
     c = None
     cName = 'c_'
     if pad == None:
@@ -41,14 +43,39 @@ def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None,
         if fitName != None:
             if fitName['name'] == 'gaus':
                 print 'Fitting ', h.GetName()
-                if 'xmin' and 'xmax' in fitName:
-                    h.Fit(fitName['name'],'0R','',fitName['xmin'],fitName['xmax'])
+                fitFuncName = 'fg_' + h.GetName()
+                fitOpt = '0R'
+                fg = TF1(fitFuncName,'gaus')
+                if h.GetRMS() < 1e-10 or h.GetRMS() < h.GetBinWidth(1):
+                    print 'WARNING: histogram ', h.GetName(), ' has small RMS', h.GetRMS(), ' dont fit but use that RMS and mean ', h.GetMean() 
+                    fg.SetParameter(0,0) 
+                    fg.SetParameter(1, h.GetMean() )
+                    fg.SetParameter(2, h.GetRMS() )
+                    listOfFunctions = h.GetListOfFunctions()
+                    print 'got ', len(listOfFunctions), ' function'
+                    for func in listOfFunctions: print func.GetName()
+                    listOfFunctions.append(fg)
+                    print 'now got ', len(listOfFunctions), ' function'
+                    for func in listOfFunctions: print func.GetName()
                 else:
-                    h.Fit(fitName['name'],'0')                    
-                f = h.GetFunction(fitName['name'])
+                    if 'xmin' and 'xmax' in fitName:
+                        fg.SetRange(fitName['xmin'],fitName['xmax'])
+                    else:
+                        fg.SetRange(h.GetBinCenter(1),h.GetBinCenter(h.GetNbinsX()+1))
+                    if 'peakbin' in fitName:
+                        bc = getHistMaxBinValue(h)    
+                        fg.SetParameter(1,bc)                
+                    if 'rms' in fitName:
+                        bc = getHistMaxBinValue(h)    
+                        rms = h.GetRMS()
+                        fg.SetParameter(1,bc)                
+                        fg.SetParameter(2,rms)                
+                        fg.SetRange( bc - rms*fitName['rms'], bc + rms*fitName['rms'] )
+                    h.Fit(fg,fitOpt)
+                f = fg #h.GetFunction(fitFuncName)
                 if f != None:
                     f.SetLineColor(lineColors[ih])
-                    f.SetLineWidth(lineWidth)                            
+                    f.SetLineWidth(lineWidth)
         if ih != -1:
             h.SetFillColor(fillColors[ih])
             h.SetFillStyle(3002)
