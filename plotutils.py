@@ -84,6 +84,15 @@ def getGraphMaxMinVal(gr):
             ymin = y
     return [ymin, ymax]
 
+def getHistMaxBinValue(h):    
+    ymax = -999999.9
+    for i in range(1,h.GetNbinsX()+1):
+        y = h.GetBinContent(i)
+        x = h.GetBinCenter(i)
+        if y > ymax:
+            ymax = y
+            xmax = x
+    return xmax
 
 
         
