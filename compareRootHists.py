@@ -36,7 +36,10 @@ def compareHists(histos,legends=None,normalize=None,fitName=None, t='',pad=None,
         h.SetLineWidth(lineWidth)
         h.Sumw2()
         if normalize != None:
-            h.Scale(1.0/h.Integral())
+            if h.Integral() == 0:
+                print 'warning: histogram ', h.GetName(), ' cannot be normalized with no integral!'
+            else:
+                h.Scale(1.0/h.Integral())
         if h.GetMaximum() > maxBC:
             maxBC = h.GetMaximum()
         f = None

@@ -2,6 +2,12 @@ import sys
 from ROOT import TLatex, TLegend, gDirectory, TIter, TCanvas, Double
 
 
+def setGraphXLabels(gr,idToName):
+    h = gr.GetHistogram()
+    for i,name in idToName.iteritems():
+        b = h.FindBin(i)
+        h.GetXaxis().SetBinLabel(b, name )
+
 def myText(x,y,text, tsize,color):
     l = TLatex()
     l.SetTextSize(tsize); 
