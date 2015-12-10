@@ -45,6 +45,12 @@ def divideTGraphs(gr_num, gr_den, checkNumPoints=False):
     return grR
 
 
+def setGraphXLabels(gr,idToName):
+    h = gr.GetHistogram()
+    for i,name in idToName.iteritems():
+        b = h.FindBin(i)
+        h.GetXaxis().SetBinLabel(b, name )
+
 def myText(x,y,text, tsize,color):
     l = TLatex()
     l.SetTextSize(tsize); 

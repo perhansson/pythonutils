@@ -36,11 +36,9 @@ def get_module_names():
 
 
 def getshortsensorname(name):
-    s = name
-    s = s.replace('_sensor0','')
-    s = s.replace('_halfmodule','')
-    s = s.replace('_module_','')
-    s = s.replace('module_','')
+    s = 'L' + str( getLayer(name) ) + getHalf(name) + '_' + getAxialStereo(name)
+    if getLayer(name) > 3:
+        s += '_' + getHoleSlot(name)
     return s
 
 def getSensorNames(includeL0=False):
@@ -110,3 +108,92 @@ def getHoleSlot( deName):
         else:
             print "Cannot extract axial or stereo from deName ", deName
             sys.exit(1)
+
+
+
+def getCanvasIdxTwoCols(sensor,includeL0=False):
+    l = getLayer(sensor)
+    half = getHalf(sensor)
+    side = getHoleSlot(sensor)
+    stereoname = getAxialStereo(sensor)
+    i = -1
+
+    if not includeL0:
+
+        L4ID = 4
+        if l < L4ID:
+            if half=='t':
+                if stereoname=='axial':
+                    i = (l-1)*4+1
+                else:
+                    i = (l-1)*4+3
+            else:
+                if stereoname=='stereo':
+                    i = (l-1)*4+1
+                else:
+                    i = (l-1)*4+3
+        else:
+            if half=='t':
+                if stereoname=='axial':
+                    if side == 'hole':
+                        i = (l-1)*4+1
+                    else:
+                        i = (l-1)*4+2
+                else:
+                    if side == 'hole':
+                        i = (l-1)*4+3
+                    else:
+                        i = (l-1)*4+4
+            else:
+                if stereoname=='stereo':
+                    if side == 'hole':
+                        i = (l-1)*4+1
+                    else:
+                        i = (l-1)*4+2
+                else:
+                    if side == 'hole':
+                        i = (l-1)*4+3
+                    else:
+                        i = (l-1)*4+4
+    else:
+        
+        L4ID = 4
+        if l < L4ID:
+            if half=='t':
+                if stereoname=='axial':
+                    i = (l)*4+1
+                else:
+                    i = (l)*4+3
+            else:
+                if stereoname=='stereo':
+                    i = (l)*4+1
+                else:
+                    i = (l)*4+3
+        else:
+            if half=='t':
+                if stereoname=='axial':
+                    if side == 'hole':
+                        i = (l)*4+1
+                    else:
+                        i = (l)*4+2
+                else:
+                    if side == 'hole':
+                        i = (l)*4+3
+                    else:
+                        i = (l)*4+4
+            else:
+                if stereoname=='stereo':
+                    if side == 'hole':
+                        i = (l)*4+1
+                    else:
+                        i = (l)*4+2
+                else:
+                    if side == 'hole':
+                        i = (l)*4+3
+                    else:
+                        i = (l)*4+4
+        
+    
+    #print sensor, " -> layer ", l, " / ", half, " / ", stereoname, " / ", side, "   ==>  ", i
+    return i
+
