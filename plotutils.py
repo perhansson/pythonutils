@@ -1,5 +1,48 @@
 import sys
-from ROOT import TLatex, TLegend, gDirectory, TIter, TCanvas, Double
+import math
+from ROOT import TLatex, TLegend, gDirectory, TIter, TCanvas, Double, TH2F, TGraphErrors
+from ROOT import Double as ROOTDouble
+
+
+def divideTGraphs(gr_num, gr_den, checkNumPoints=False):
+    ''' Assumes Poission errors. '''
+    n = gr_num.GetN()
+    
+    if gr_den.GetN() != n and checkNumPoints:
+        print 'graphs need the same nr of points'
+        sys.exit(1)
+    xn = ROOTDouble(0)
+    yn = ROOTDouble(0)
+    xd = ROOTDouble(0)
+    yd = ROOTDouble(0)
+
+    grR = TGraphErrors()
+    grR.SetName(gr_num.GetName() + '_ratio')
+    for i in range(n):
+        gr_num.GetPoint(i,xn,yn)
+        dy_num = gr_num.GetErrorY(i)
+        # find the same point for the other graph
+        for j in range(n):
+            gr_den.GetPoint(j,xd,yd)
+            dy_den = gr_den.GetErrorY(i)
+            if xd != xn:
+                continue
+            else:
+                # found it, do the ratio
+                if yd == 0.:
+                    print 'den is zero for point ', i, ' at x ', x
+                    continue
+                else:
+                    point = grR.GetN()
+                    r = yn/yd
+                    print 'point ', point,' r ', r, ' yn ', yn, ' yd ', yd, ' x ', xn, ' dy_num ', dy_num, ' dy_den ', dy_den
+                    dr = math.sqrt( (1/(yd**2)) * (dy_num**2) + ((yn/(yd**2))**2) * (dy_den**2) )
+                    if dr/math.fabs(r) > 2.:
+                        continue
+                    grR.SetPoint(point,xn,r)
+                    grR.SetPointError(point,0.,dr)
+                    print 'point ', point,' r ', r, ' dr ', dr, ' x ', xn
+    return grR
 
 
 def myText(x,y,text, tsize,color):
@@ -46,6 +89,32 @@ def setBinLabels(gr,names):
         b = h.FindBin(i)
         h.GetXaxis().SetBinLabel(b, p )
         i = i + 1
+
+def fixSaveName(name):
+    save_name = name.replace(' ','_').replace(')','_').replace('(','_').replace('>=','')
+    return save_name
+    
+
+def getTemplate(gr,names):
+    n = gr.GetN()
+    n_names = len(names)
+    if n != n_names:
+        print 'npoints ', n, ' n_names ', n_names, ' doesnt match'
+        sys.exit(1)
+    hgr = gr.GetHistogram()
+    n_hgr = hgr.GetNbinsX()
+    h = TH2F('h_' + gr.GetName(), gr.GetTitle(), n, hgr.GetXaxis().GetBinLowEdge(1),hgr.GetXaxis().GetBinUpEdge(n_hgr),10,hgr.GetMinimum(), hgr.GetMaximum())
+    print h.GetNbinsX(), ' vs ', gr.GetN()
+    i = 0
+    for p in names:
+        x , y =  ROOTDouble(0), ROOTDouble(0)
+        gr.GetPoint(i,x,y)        
+        b = h.GetXaxis().FindBin(x)
+        print  'x ', x, ' y ', y, ' binlabel ', p, ' i ', i, ' b ', b, ' low ', hgr.GetXaxis().GetBinLowEdge(1), ' high ', hgr.GetXaxis().GetBinUpEdge(n_hgr)
+        h.GetXaxis().SetBinLabel(b, p )
+        i = i + 1
+    return h
+
 
 def setBinLabelsDict(gr,namePoints):
     h = gr.GetHistogram()
