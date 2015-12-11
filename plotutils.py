@@ -6,6 +6,8 @@ from ROOT import Double as ROOTDouble
 
 def divideTGraphs(gr_num, gr_den, checkNumPoints=False):
     ''' Assumes Poission errors. '''
+
+    debug = False
     n = gr_num.GetN()
     
     if gr_den.GetN() != n and checkNumPoints:
@@ -35,13 +37,13 @@ def divideTGraphs(gr_num, gr_den, checkNumPoints=False):
                 else:
                     point = grR.GetN()
                     r = yn/yd
-                    print 'point ', point,' r ', r, ' yn ', yn, ' yd ', yd, ' x ', xn, ' dy_num ', dy_num, ' dy_den ', dy_den
+                    if debug: print 'point ', point,' r ', r, ' yn ', yn, ' yd ', yd, ' x ', xn, ' dy_num ', dy_num, ' dy_den ', dy_den
                     dr = math.sqrt( (1/(yd**2)) * (dy_num**2) + ((yn/(yd**2))**2) * (dy_den**2) )
                     if dr/math.fabs(r) > 2.:
                         continue
                     grR.SetPoint(point,xn,r)
                     grR.SetPointError(point,0.,dr)
-                    print 'point ', point,' r ', r, ' dr ', dr, ' x ', xn
+                    if debug: print 'point ', point,' r ', r, ' dr ', dr, ' x ', xn
     return grR
 
 
