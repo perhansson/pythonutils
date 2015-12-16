@@ -46,7 +46,6 @@ def divideTGraphs(gr_num, gr_den, checkNumPoints=False):
                     if debug: print 'point ', point,' r ', r, ' dr ', dr, ' x ', xn
     return grR
 
-
 def setGraphXLabels(gr,idToName):
     h = gr.GetHistogram()
     for i,name in idToName.iteritems():
